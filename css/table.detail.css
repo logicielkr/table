@@ -1,0 +1,25 @@
+ul.multitab,
+h3.graha_table,
+h3.graha_column
+{
+	display:none;
+}
+table#graha_table {
+	margin-bottom:10px;
+}
+
+table#graha_table th {
+	width:120px;
+}
+table#graha_table td.contents,
+table#graha_table td.ddl_scripts
+{
+	white-space:pre-wrap;
+	height:100px;
+}
+
+table#graha_table td.is_graha_style_key,
+table#graha_table td.is_graha_style_pseudo_column {
+	min-width:50px;
+	text-align:center;
+}

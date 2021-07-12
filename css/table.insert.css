@@ -1,0 +1,16 @@
+ul.multitab,
+h3.graha_table,
+h3.graha_column
+{
+	display:none;
+}
+table#graha_table {
+	margin-bottom:10px;
+}
+
+table#graha_table th {
+	width:120px;
+}
+table#graha_table textarea.contents {
+	height:100px;
+}

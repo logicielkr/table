@@ -1,0 +1,350 @@
+<querys>
+	<header extends="_base.xml">
+		<jndi name="jdbc/graha_sample" />
+		<prop name="logined_user" value="guest" />
+		<prop name="logined_user" value="${session.user_id}" cond="${session.user_id} isNotEmpty" />
+		<prop name="logined_user" value="${header.remote_user}" cond="${header.remote_user} isNotEmpty" />
+	</header>
+	<query id="list" funcType="list" label="테이블">
+		<header>
+			<style src="../../css/table.list.css" />
+		</header>
+		<commands>
+			<command name="graha_table">
+				<sql pageSize="15" pageGroupSize="10">
+					select
+						graha_table_id
+						, table_name
+						, table_comments
+						, jndi
+						, schema_name
+						, gbn
+					from graha_table
+					where insert_id = ?
+<tile cond="${param.search} isNotEmpty">
+					and (table_name like '%' || ? || '%' or table_comments like '%' || ? || '%' or contents like '%' || ? || '%')
+</tile>
+					order by graha_table_id desc
+				</sql>
+				<sql_cnt>
+					select count(*) from graha_table
+					where insert_id = ?
+<tile cond="${param.search} isNotEmpty">
+					and (table_name like '%' || ? || '%' or table_comments like '%' || ? || '%' or contents like '%' || ? || '%')
+</tile>
+				</sql_cnt>
+				<params>
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+					<param name="search" datatype="varchar" value="param.search" default="%" cond="${param.search} isNotEmpty" />
+					<param name="search" datatype="varchar" value="param.search" default="%" cond="${param.search} isNotEmpty" />
+					<param name="search" datatype="varchar" value="param.search" default="%" cond="${param.search} isNotEmpty" />
+				</params>
+			</command>
+		</commands>
+		<layout>
+			<top>
+				<left>
+					<link name="insert" label="추가" path="/table/insert" />
+				</left>
+			</top>
+			<middle>
+				<tab name="graha_table">
+					<column label="테이블이름" name="table_name">
+						<link path="/table/detail">
+							<param name="graha_table_id" type="query" value="graha_table_id" />
+							<param name="page" type="param" value="page" />
+						</link>
+					</column>
+					<column label="테이블설명" name="table_comments" />
+					<column label="JNDI 이름" name="jndi" />
+					<column label="스키마이름" name="schema_name" />
+					<column label="업무구분" name="gbn" />
+				</tab>
+			</middle>
+			<bottom>
+			<center>page</center>
+			</bottom>
+		</layout>
+	</query>
+	<query id="insert" funcType="insert" label="테이블">
+		<header>
+			<style src="../../css/table.insert.css" />
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
+			<script src="../../js/table.insert.js" name="check_submit" override="true" />
+			<script src="../../js/table.insert.load.js" />
+		</header>
+		<validation method="POST">
+			<param name="table_name" not-null="true" msg="테이블이름은 필수 항목입니다!" />
+		</validation>
+		<tables>
+			<table tableName="graha_table" name="graha_table" label="테이블">
+				<column name="graha_table_id" value="param.graha_table_id" datatype="int"  primary="true"  insert="sequence.nextval('graha_table$graha_table_id')" />
+				<column name="table_name" value="param.table_name" datatype="varchar" />
+				<column name="table_comments" value="param.table_comments" datatype="varchar" />
+				<column name="contents" value="param.contents" datatype="varchar" />
+				<column name="jndi" value="param.jndi" datatype="varchar" />
+				<column name="schema_name" value="param.schema_name" datatype="varchar" />
+				<column name="gbn" value="param.gbn" datatype="varchar" />
+				<column name="insert_date" only="insert" value="sql.now()" datatype="timestamp" />
+				<column name="insert_id" only="insert" value="prop.logined_user" datatype="varchar" />
+				<column name="insert_ip" only="insert" value="header.remote_addr" datatype="varchar" />
+				<column name="update_date" value="sql.now()" datatype="timestamp" />
+				<column name="update_id" value="prop.logined_user" datatype="varchar" />
+				<column name="update_ip" value="header.remote_addr" datatype="varchar" />
+				<column name="is_graha_style_key" value="param.is_graha_style_key" datatype="boolean" />
+				<column name="is_graha_style_pseudo_column" value="param.is_graha_style_pseudo_column" datatype="boolean" />
+				<where>
+					<sql>
+						insert_id = ?
+					</sql>
+					<params>
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+					</params>
+				</where>
+			</table>
+			<table tableName="graha_column" name="graha_column" label="컬럼"  multi="true" append="5">
+				<column name="graha_column_id" value="param.graha_column.graha_column_id" datatype="int"  primary="true"  insert="sequence.nextval('graha_column$graha_column_id')" />
+				<column name="column_comments" value="param.graha_column.column_comments" datatype="varchar" />
+				<column name="column_name" value="param.graha_column.column_name" datatype="varchar" />
+				<column name="data_type" value="param.graha_column.data_type" datatype="varchar" />
+				<column name="length" value="param.graha_column.length" datatype="int" />
+				<column name="is_primary_key" value="param.graha_column.is_primary_key" datatype="boolean" />
+				<column name="is_sequence" value="param.graha_column.is_sequence" datatype="boolean" />
+				<column name="contents" value="param.graha_column.contents" datatype="varchar" />
+				<column name="graha_table_id" value="param.graha_table_id" datatype="int" foreign="true" />
+				<column name="insert_date" only="insert" value="sql.now()" datatype="timestamp" />
+				<column name="insert_id" only="insert" value="prop.logined_user" datatype="varchar" />
+				<column name="insert_ip" only="insert" value="header.remote_addr" datatype="varchar" />
+				<column name="update_date" value="sql.now()" datatype="timestamp" />
+				<column name="update_id" value="prop.logined_user" datatype="varchar" />
+				<column name="update_ip" value="header.remote_addr" datatype="varchar" />
+				<where>
+					<sql>
+						insert_id = ?
+					</sql>
+					<params>
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+					</params>
+				</where>
+				<order>graha_column_id</order>
+			</table>
+		</tables>
+		<layout msg="변경사항을 저장하시겠습니까?">
+			<top>
+				<left />
+				<center />
+				<right>
+					<link name="list" label="목록" path="/table/list">
+						<params>
+							<param name="page" type="param" value="page" />
+						</params>
+					</link>
+					<link name="save" label="저장" path="/table/insert" method="post" type="submit" full="true">
+						<params>
+							<param name="graha_table_id" type="query" value="graha_table_id" />
+							<param name="page" type="param" value="page" />
+						</params>
+					</link>
+				</right>
+			</top>
+			<middle>
+				<tab name="graha_table" label="테이블">
+					<row>
+						<column label="테이블이름" name="table_name" value="table_name" colspan="3" />
+						<column label="Graha PK" name="is_graha_style_key" value="is_graha_style_key" type="checkbox" val="t" />
+					</row>
+					<row>
+						<column label="테이블설명" name="table_comments" value="table_comments" colspan="3" />
+						<column label="의사컬럼" name="is_graha_style_pseudo_column" value="is_graha_style_pseudo_column" type="checkbox" val="t" />
+					</row>
+					<row>
+						<column label="비고" name="contents" value="contents" type="textarea" colspan="5" />
+					</row>
+					<row>
+						<column label="JNDI 이름" name="jndi" value="jndi" />
+						<column label="스키마이름" name="schema_name" value="schema_name" />
+						<column label="업무구분" name="gbn" value="gbn" />
+					</row>
+				</tab>
+				<tab name="graha_column" label="컬럼">
+						<column name="graha_column.graha_column_id" value="graha_column_id" type="hidden" />
+					<row>
+						<column label="속성명" name="graha_column.column_comments" value="column_comments" />
+						<column label="속성ID" name="graha_column.column_name" value="column_name" />
+						<column label="자료형" name="graha_column.data_type" value="data_type" type="select">
+							<option value="" label="=====" />
+							<option value="varchar" label="varchar" />
+							<option value="int" label="int" />
+							<option value="timestamp" label="timestamp" />
+							<option value="date" label="date" />
+							<option value="char" label="char" />
+							<option value="text" label="text" />
+							<option value="long" label="long" />
+							<option value="float" label="float" />
+							<option value="double" label="double" />
+							<option value="boolean" label="boolean" />
+						</column>
+						<column label="길이" name="graha_column.length" value="length" />
+						<column label="Key" name="graha_column.is_primary_key" value="is_primary_key" type="checkbox" val="t" />
+						<column label="SEQ" name="graha_column.is_sequence" value="is_sequence" type="checkbox" val="t" />
+						<column label="비고" name="graha_column.contents" value="contents" />
+						<column label="삭제" name="graha_column.del" value="삭제" type="button" />
+					</row>
+				</tab>
+			</middle>
+			<bottom>
+				<right>
+				</right>
+			</bottom>
+		</layout>
+		<redirect path="/table/list">
+			<param name="page" type="param" value="page" />
+		</redirect>
+	</query>
+	<query id="detail" funcType="detail" label="테이블(${/document/rows/row/table_name})">
+		<header>
+			<style src="../../css/table.detail.css" />
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
+			<script src="../../js/table.detail.js" />
+		</header>
+		<commands>
+			<command name="graha_table">
+				<sql>
+					select
+						graha_table_id
+						, table_name
+						, table_comments
+						, contents
+						, jndi
+						, schema_name
+						, gbn
+						, is_graha_style_key
+						, is_graha_style_pseudo_column
+					from graha_table
+						where graha_table_id = ? and insert_id = ?
+				</sql>
+				<params>
+					<param default="null" name="graha_table_id" datatype="int" value="param.graha_table_id" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+				</params>
+			</command>
+			<command name="graha_column"  multi="true">
+				<sql>
+					select
+						graha_column_id
+						, column_comments
+						, column_name
+						, data_type
+						, length
+						, is_primary_key
+						, is_sequence
+						, contents
+						, graha_table_id
+					from graha_column
+						where graha_table_id = ? and insert_id = ?
+						order by graha_column_id
+				</sql>
+				<params>
+					<param default="null" name="graha_table_id" datatype="int" value="param.graha_table_id" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+				</params>
+			</command>
+		</commands>
+		<layout>
+			<top>
+				<left />
+				<center />
+				<right>
+					<link name="list" label="목록" path="/table/list">
+						<params>
+							<param name="page" type="param" value="page" />
+						</params>
+					</link>
+					<link name="update" label="수정" path="/table/insert">
+						<params>
+							<param name="graha_table_id" type="query" value="graha_table_id" />
+							<param name="page" type="param" value="page" />
+						</params>
+					</link>
+				</right>
+			</top>
+			<middle>
+				<tab name="graha_table" label="테이블">
+					<row>
+						<column label="테이블이름" name="table_name" colspan="3" />
+						<column label="Graha PK" name="is_graha_style_key" />
+					</row>
+					<row>
+						<column label="테이블설명" name="table_comments" colspan="3" />
+						<column label="의사 컬럼" name="is_graha_style_pseudo_column" />
+					</row>
+					<row>
+						<column label="비고" name="contents" colspan="5" />
+					</row>
+					<row>
+						<column label="DDL Scripts" name="ddl_scripts" colspan="5" />
+					</row>
+					<row>
+						<column label="JNDI 이름" name="jndi" />
+						<column label="스키마이름" name="schema_name" />
+						<column label="업무구분" name="gbn" />
+					</row>
+				</tab>
+				<tab name="graha_column" label="컬럼">
+					<row>
+						<column label="속성명" name="column_comments" />
+						<column label="속성ID" name="column_name" />
+						<column label="자료형" name="data_type" />
+						<column label="길이" name="length" />
+						<column label="Key" name="is_primary_key" />
+						<column label="SEQ" name="is_sequence" />
+						<column label="비고" name="contents" />
+					</row>
+				</tab>
+			</middle>
+			<bottom>
+				<left>
+					<link label="삭제" path="/table/delete" method="post" type="submit" msg="정말로 삭제하시겠습니까?">
+						<params>
+							<param name="graha_table_id" type="query" value="graha_table_id" />
+						</params>
+					</link>
+				</left>
+			</bottom>
+			
+		</layout>
+	</query>
+	<query id="delete" funcType="delete" label="테이블">
+		<tables>
+			<table tableName="graha_table" name="graha_table">
+				<column name="graha_table_id" primary="true" value="param.graha_table_id" datatype="int" />
+				<where>
+					<sql>
+						insert_id = ?
+					</sql>
+					<params>
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+					</params>
+				</where>
+			</table>
+			<table tableName="graha_column" name="graha_column">
+				<column name="graha_table_id" foreign="true" value="param.graha_table_id" datatype="int" />
+				<where>
+					<sql>
+						insert_id = ?
+					</sql>
+					<params>
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+					</params>
+				</where>
+			</table>
+		</tables>
+		<redirect path="/table/list" />
+	</query>
+	<query id="load" funcType="query" label="Load From DB">
+		<commands>
+			<command name="execute" type="native" class="kr.graha.sample.table.LoadFromDBProcessorImpl" />
+		</commands>
+		<redirect path="/table/list" />
+	</query>
+</querys>
