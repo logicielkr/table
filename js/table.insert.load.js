@@ -143,6 +143,6 @@ function loadFromDB() {
 }
 $(document).ready(function() {
 	if($("form#insert input[name='query_id']").val() != "") {
-		$("div.nav.top div.box.center").append($("<button type='button' onclick='loadFromDB()'>DB에서 불러오기</button>"));
+		$("div.nav.top div.box.center").append($("<button type='button' onclick='loadFromDB()'>조회(DB)</button>"));
 	}
 });

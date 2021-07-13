@@ -14,3 +14,57 @@ table#graha_table th {
 table#graha_table textarea.contents {
 	height:100px;
 }
+@media only screen and (max-width: 600px) {
+	body {
+		margin:0px;
+		padding:0px;
+	}
+	table#graha_table, 
+	table#graha_table thead, 
+	table#graha_table tbody, 
+	table#graha_table tr,
+	table#graha_column, 
+	table#graha_column thead, 
+	table#graha_column tbody, 
+	table#graha_column tr
+	{
+		display:block;
+	}
+	table#graha_table th, 
+	table#graha_table td
+	{
+		display:inline-block;
+	}
+	table#graha_column th {
+		display:none;
+	}
+	table#graha_column td {
+		display:inline-block;
+		width:100%;
+	}
+	table#graha_table td
+	{
+		width: calc(100% - 125px);
+		width: -moz-calc(100% - 125px);
+		width: -webkit-calc(100% - 125px);
+	}
+	table#graha_table th.contents,
+	table#graha_table td.contents,
+	table#graha_table th.ddl_scripts,
+	table#graha_table td.ddl_scripts
+	{
+		width:100%;
+	}
+	table#graha_column td.graha_column\.is_primary_key:after {
+		content: " (Primary Key)";
+	}
+	table#graha_column td.graha_column\.is_sequence:after {
+		content: " (Sequence)";
+	}
+	table#graha_column td.graha_column\.del {
+		text-align:center;
+	}
+	table#graha_column input.label {
+		color:#cccccc;
+	}
+}

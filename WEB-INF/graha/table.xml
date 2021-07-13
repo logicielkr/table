@@ -15,6 +15,7 @@
 					select
 						graha_table_id
 						, table_name
+						, table_name as table_name_mobile
 						, table_comments
 						, jndi
 						, schema_name
@@ -51,6 +52,12 @@
 				<tab name="graha_table">
 					<column label="테이블이름" name="table_name">
 						<link path="/table/detail">
+							<param name="graha_table_id" type="query" value="graha_table_id" />
+							<param name="page" type="param" value="page" />
+						</link>
+					</column>
+					<column label="테이블이름" name="table_name_mobile">
+						<link path="/table/detail_mobile">
 							<param name="graha_table_id" type="query" value="graha_table_id" />
 							<param name="page" type="param" value="page" />
 						</link>
@@ -131,14 +138,15 @@
 		</tables>
 		<layout msg="변경사항을 저장하시겠습니까?">
 			<top>
-				<left />
-				<center />
-				<right>
+				<left>
 					<link name="list" label="목록" path="/table/list">
 						<params>
 							<param name="page" type="param" value="page" />
 						</params>
 					</link>
+				</left>
+				<center />
+				<right>
 					<link name="save" label="저장" path="/table/insert" method="post" type="submit" full="true">
 						<params>
 							<param name="graha_table_id" type="query" value="graha_table_id" />
@@ -252,14 +260,15 @@
 		</commands>
 		<layout>
 			<top>
-				<left />
-				<center />
-				<right>
+				<left>
 					<link name="list" label="목록" path="/table/list">
 						<params>
 							<param name="page" type="param" value="page" />
 						</params>
 					</link>
+				</left>
+				<center />
+				<right>
 					<link name="update" label="수정" path="/table/insert">
 						<params>
 							<param name="graha_table_id" type="query" value="graha_table_id" />
@@ -311,7 +320,93 @@
 					</link>
 				</left>
 			</bottom>
-			
+		</layout>
+	</query>
+	<query id="detail_mobile" funcType="detail" label="테이블(${/document/rows/row/table_name})" extends="detail">
+		<header>
+			<style src="../../css/table.detail.css" />
+			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
+			<script src="../../js/table.detail.js" />
+			<style>
+table#graha_column th {
+	width:120px;
+}
+			</style>
+		</header>
+		<layout>
+			<top>
+				<left>
+					<link name="list" label="목록" path="/table/list">
+						<params>
+							<param name="page" type="param" value="page" />
+						</params>
+					</link>
+				</left>
+				<center />
+				<right>
+					<link name="update" label="수정" path="/table/insert">
+						<params>
+							<param name="graha_table_id" type="query" value="graha_table_id" />
+							<param name="page" type="param" value="page" />
+						</params>
+					</link>
+				</right>
+			</top>
+			<middle>
+				<tab name="graha_table" label="테이블">
+					<row>
+						<column label="테이블이름" name="table_name" colspan="3" />
+						<column label="Graha PK" name="is_graha_style_key" />
+					</row>
+					<row>
+						<column label="테이블설명" name="table_comments" colspan="3" />
+						<column label="의사 컬럼" name="is_graha_style_pseudo_column" />
+					</row>
+					<row>
+						<column label="비고" name="contents" colspan="5" />
+					</row>
+					<row>
+						<column label="DDL Scripts" name="ddl_scripts" colspan="5" />
+					</row>
+					<row>
+						<column label="JNDI 이름" name="jndi" />
+						<column label="스키마이름" name="schema_name" />
+						<column label="업무구분" name="gbn" />
+					</row>
+				</tab>
+				<tab name="graha_column" label="컬럼">
+					<row>
+						<column label="속성명" name="column_comments" />
+					</row>
+					<row>
+						<column label="속성ID" name="column_name" />
+					</row>
+					<row>
+						<column label="자료형" name="data_type" />
+					</row>
+					<row>
+						<column label="길이" name="length" />
+					</row>
+					<row>
+						<column label="Key" name="is_primary_key" />
+					</row>
+					<row>
+						<column label="SEQ" name="is_sequence" />
+					</row>
+					<row>
+						<column label="비고" name="contents" />
+					</row>
+				</tab>
+			</middle>
+			<bottom>
+				<left>
+					<link label="삭제" path="/table/delete" method="post" type="submit" msg="정말로 삭제하시겠습니까?">
+						<params>
+							<param name="graha_table_id" type="query" value="graha_table_id" />
+						</params>
+					</link>
+				</left>
+			</bottom>
 		</layout>
 	</query>
 	<query id="delete" funcType="delete" label="테이블">

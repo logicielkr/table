@@ -66,18 +66,30 @@ $(document).ready(function() {
 		comments_scripts += "COMMENT ON COLUMN ";
 		comments_scripts += getSchemaName() + "" + $("table#graha_table td.table_name").text() + "." + $("table#graha_table td.table_name").text() + "_id IS '고유번호';\n";
 	}
-	$("table#graha_column tbody tr").each(function() {
-		if(is_graha_style_key($(this).find("td.column_name").text())) {
-		} else if(is_graha_style_pseudo_column($(this).find("td.column_name").text())) {
+	$("table#graha_column tbody tr td.column_name").each(function() {
+		if(is_graha_style_key($(this).text())) {
+		} else if(is_graha_style_pseudo_column($(this).text())) {
 		} else {
-			if($(this).find("td.length").text() != "") {
-				ddl_scripts += "\t" + $(this).find("td.column_name").text() + " " + getDataType($(this).find("td.data_type").text(), "postgresql") + "(" + $(this).find("td.length").text() + "),\n";
+			var length, column_comments, data_type;
+			if($(this).parent().find("td.length").length == 0) {
+				length = $(this).parent().next().next().find("td.length").text();
+				column_comments = $(this).parent().prev().find("td.column_comments").text();
+				data_type = $(this).parent().next().find("td.data_type").text();
+				console.log(data_type);
 			} else {
-				ddl_scripts += "\t" + $(this).find("td.column_name").text() + " " + getDataType($(this).find("td.data_type").text(), "postgresql") + ",\n";
+				length = $(this).parent().find("td.length").text();
+				column_comments = $(this).parent().find("td.column_comments").text();
+				data_type = $(this).parent().find("td.data_type").text();
 			}
-			if($(this).find("td.column_comments").text() != "") {
+			
+			if(length != "") {
+				ddl_scripts += "\t" + $(this).text() + " " + getDataType(data_type, "postgresql") + "(" + length + "),\n";
+			} else {
+				ddl_scripts += "\t" + $(this).text() + " " + getDataType(data_type, "postgresql") + ",\n";
+			}
+			if(column_comments != "") {
 				comments_scripts += "COMMENT ON COLUMN ";
-				comments_scripts += getSchemaName() + "" + $("table#graha_table td.table_name").text() + "." + $(this).find("td.column_name").text() + " IS '" + $(this).find("td.column_comments").text() + "';\n";
+				comments_scripts += getSchemaName() + "" + $("table#graha_table td.table_name").text() + "." + $(this).text() + " IS '" + column_comments + "';\n";
 			}
 		}
 	});
@@ -101,12 +113,16 @@ $(document).ready(function() {
 		ddl_scripts += $("table#graha_table td.table_name").text() + "_id";
 	} else {
 		var idx = 0;
-		$("table#graha_column tbody tr").each(function() {
-			if($(this).find("td.is_primary_key").text() == "t") {
+		$("table#graha_column tbody tr td.is_primary_key").each(function() {
+			if($(this).text() == "t") {
 				if(idx > 0) {
 					ddl_scripts += ", ";
 				}
-				ddl_scripts += $(this).find("td.column_name").text();
+				if($(this).parent().find("td.column_name").length == 0) {
+					ddl_scripts += $(this).parent().prev().prev().prev().find("td.column_name").text();
+				} else {
+					ddl_scripts += $(this).parent().find("td.column_name").text();
+				}
 				idx++;
 			}
 		});

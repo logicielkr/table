@@ -25,6 +25,46 @@ $(document).ready(function() {
 	$("table#graha_column td.graha_column\\.del input").click(function(event) {
 		del(this);
 	});
+	if(!$("table#graha_column th.graha_column\\.column_name").is(':visible')) {
+		$("table#graha_column td.graha_column\\.column_name input")
+		.add("table#graha_column td.graha_column\\.column_comments input")
+		.add("table#graha_column td.graha_column\\.length input")
+		.add("table#graha_column td.graha_column\\.contents input")
+		.each(function() {
+			if($(this).val() == "") {
+				if($(this).parent().hasClass("graha_column.column_name")) {
+					$(this).val("속성ID을 입력하세요.");
+				} else if($(this).parent().hasClass("graha_column.column_comments")) {
+					$(this).val("속성명을 입력하세요.");
+				} else if($(this).parent().hasClass("graha_column.length")) {
+					$(this).val("길이를 입력하세요.");
+				} else if($(this).parent().hasClass("graha_column.contents")) {
+					$(this).val("비고를 입력하세요.");
+				}
+				$(this).addClass("label");
+			}
+			$(this).focus(function() {
+				if($(this).hasClass("label")) {
+					$(this).val("");
+					$(this).removeClass("label");
+				}
+			});
+			$(this).blur(function() {
+				if($(this).val() == "") {
+					if($(this).parent().hasClass("graha_column.column_name")) {
+						$(this).val("속성ID을 입력하세요.");
+					} else if($(this).parent().hasClass("graha_column.column_comments")) {
+						$(this).val("속성명을 입력하세요.");
+					} else if($(this).parent().hasClass("graha_column.length")) {
+						$(this).val("길이를 입력하세요.");
+					} else if($(this).parent().hasClass("graha_column.contents")) {
+						$(this).val("비고를 입력하세요.");
+					}
+					$(this).addClass("label");
+				}
+			});
+		});
+	}
 });
 function check_submit(form, msg) {
 	if(typeof(_check) == "function" && !_check(form)) {
@@ -35,6 +75,17 @@ function check_submit(form, msg) {
 			$(this).val("");
 			$(this).attr("disabled", false);
 		});
+		if(!$("table#graha_column th.graha_column\\.column_name").is(':visible')) {
+			$("table#graha_column td.graha_column\\.column_name input")
+			.add("table#graha_column td.graha_column\\.column_comments input")
+			.add("table#graha_column td.graha_column\\.length input")
+			.add("table#graha_column td.graha_column\\.contents input")
+			.each(function() {
+				if($(this).hasClass("label")) {
+					$(this).val("");
+				}
+			});
+		}
 		return true;
 	} else {
 		return false;
