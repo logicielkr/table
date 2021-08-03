@@ -25,6 +25,8 @@ $(document).ready(function() {
 	$("table#graha_column td.graha_column\\.del input").click(function(event) {
 		del(this);
 	});
+});
+$(window).on("load", function() {
 	if(!$("table#graha_column th.graha_column\\.column_name").is(':visible')) {
 		$("table#graha_column td.graha_column\\.column_name input")
 		.add("table#graha_column td.graha_column\\.column_comments input")
