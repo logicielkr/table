@@ -62,7 +62,7 @@ $(document).ready(function() {
 	ddl_scripts += "create table ";
 	ddl_scripts += getSchemaName() + $("table#graha_table td.table_name").text() + "(\n";
 	if($("table#graha_table td.is_graha_style_key").text() == "t") {
-		ddl_scripts += "\t" + $("table#graha_table td.table_name").text() + "_id integer NOT NULL DEFAULT nextval('" + $("table#graha_table td.table_name").text() + "$" + $("table#graha_table td.table_name").text() + "_id'::regclass),\n";
+		ddl_scripts += "\t" + $("table#graha_table td.table_name").text() + "_id integer NOT NULL DEFAULT nextval('" + getSchemaName() + $("table#graha_table td.table_name").text() + "$" + $("table#graha_table td.table_name").text() + "_id'::regclass),\n";
 		comments_scripts += "COMMENT ON COLUMN ";
 		comments_scripts += getSchemaName() + "" + $("table#graha_table td.table_name").text() + "." + $("table#graha_table td.table_name").text() + "_id IS '고유번호';\n";
 	}
@@ -75,14 +75,13 @@ $(document).ready(function() {
 				length = $(this).parent().next().next().find("td.length").text();
 				column_comments = $(this).parent().prev().find("td.column_comments").text();
 				data_type = $(this).parent().next().find("td.data_type").text();
-				console.log(data_type);
 			} else {
 				length = $(this).parent().find("td.length").text();
 				column_comments = $(this).parent().find("td.column_comments").text();
 				data_type = $(this).parent().find("td.data_type").text();
 			}
 			
-			if(length != "") {
+			if(length != "" && length != "0") {
 				ddl_scripts += "\t" + $(this).text() + " " + getDataType(data_type, "postgresql") + "(" + length + "),\n";
 			} else {
 				ddl_scripts += "\t" + $(this).text() + " " + getDataType(data_type, "postgresql") + ",\n";
