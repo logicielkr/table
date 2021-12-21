@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import kr.graha.lib.Processor;
 import kr.graha.lib.Record;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import kr.graha.helper.LOG;
 import kr.graha.helper.DB;
 
@@ -109,7 +110,7 @@ public class LoadFromDBProcessorImpl implements Processor {
 				DB.close(conn);
 			}
 		} catch (SQLException e) {
-			logger.severe(LOG.toString(e));
+			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
 			params.put("result.err", LOG.toString(e));
 			params.put("result.error_message", e.getMessage());
 			params.put("result.error_code", e.getErrorCode());
