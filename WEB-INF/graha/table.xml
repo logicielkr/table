@@ -20,7 +20,7 @@
 						, jndi
 						, schema_name
 						, gbn
-					from graha_table
+					from graha_table.graha_table
 					where insert_id = ?
 <tile cond="${param.search} isNotEmpty">
 					and (table_name like '%' || ? || '%' or table_comments like '%' || ? || '%' or contents like '%' || ? || '%')
@@ -28,7 +28,7 @@
 					order by graha_table_id desc
 				</sql>
 				<sql_cnt>
-					select count(*) from graha_table
+					select count(*) from graha_table.graha_table
 					where insert_id = ?
 <tile cond="${param.search} isNotEmpty">
 					and (table_name like '%' || ? || '%' or table_comments like '%' || ? || '%' or contents like '%' || ? || '%')
@@ -79,13 +79,24 @@
 			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
 			<script src="../../js/table.insert.js" name="check_submit" override="true" />
 			<script src="../../js/table.insert.load.js" />
+			<script src="//graha.kr/static-contents/client_lib/formula/0.5.0.0/GrahaFormula.js" />
 		</header>
 		<validation method="POST">
 			<param name="table_name" not-null="true" msg="테이블이름은 필수 항목입니다!" />
 		</validation>
+		<calculator>
+			<param name="table_name" form="insert" event="blur submit" expr="trim(table_name)" />
+			<param name="table_comments" form="insert" event="blur submit" expr="trim(table_comments)" />
+			<param name="jndi" form="insert" event="blur submit" expr="trim(jndi)" />
+			<param name="schema_name" form="insert" event="blur submit" expr="trim(schema_name)" />
+			<param name="gbn" form="insert" event="blur submit" expr="trim(gbn)" />
+			<param name="graha_column.column_comments.{N}" form="insert" event="blur submit" expr="trim(graha_column.column_comments.{N})" />
+			<param name="graha_column.column_name.{N}" form="insert" event="blur submit" expr="trim(graha_column.column_name.{N})" />
+			<param name="graha_column.length.{N}" form="insert" event="blur submit" expr="trim(graha_column.length.{N})" />
+		</calculator>
 		<tables>
-			<table tableName="graha_table" name="graha_table" label="테이블">
-				<column name="graha_table_id" value="param.graha_table_id" datatype="int"  primary="true"  insert="sequence.nextval('graha_table$graha_table_id')" />
+			<table tableName="graha_table.graha_table" name="graha_table" label="테이블">
+				<column name="graha_table_id" value="param.graha_table_id" datatype="int"  primary="true"  insert="sequence.nextval('graha_table.graha_table$graha_table_id')" />
 				<column name="table_name" value="param.table_name" datatype="varchar" />
 				<column name="table_comments" value="param.table_comments" datatype="varchar" />
 				<column name="contents" value="param.contents" datatype="varchar" />
@@ -109,8 +120,8 @@
 					</params>
 				</where>
 			</table>
-			<table tableName="graha_column" name="graha_column" label="컬럼"  multi="true" append="5">
-				<column name="graha_column_id" value="param.graha_column.graha_column_id" datatype="int"  primary="true"  insert="sequence.nextval('graha_column$graha_column_id')" />
+			<table tableName="graha_table.graha_column" name="graha_column" label="컬럼"  multi="true" append="5">
+				<column name="graha_column_id" value="param.graha_column.graha_column_id" datatype="int"  primary="true"  insert="sequence.nextval('graha_table.graha_column$graha_column_id')" />
 				<column name="column_comments" value="param.graha_column.column_comments" datatype="varchar" />
 				<column name="column_name" value="param.graha_column.column_name" datatype="varchar" />
 				<column name="data_type" value="param.graha_column.data_type" datatype="varchar" />
@@ -228,7 +239,7 @@
 						, gbn
 						, is_graha_style_key
 						, is_graha_style_pseudo_column
-					from graha_table
+					from graha_table.graha_table
 						where graha_table_id = ? and insert_id = ?
 				</sql>
 				<params>
@@ -248,7 +259,7 @@
 						, is_sequence
 						, contents
 						, graha_table_id
-					from graha_column
+					from graha_table.graha_column
 						where graha_table_id = ? and insert_id = ?
 						order by graha_column_id
 				</sql>
@@ -411,7 +422,7 @@ table#graha_column th {
 	</query>
 	<query id="delete" funcType="delete" label="테이블">
 		<tables>
-			<table tableName="graha_table" name="graha_table">
+			<table tableName="graha_table.graha_table" name="graha_table">
 				<column name="graha_table_id" primary="true" value="param.graha_table_id" datatype="int" />
 				<where>
 					<sql>
@@ -422,7 +433,7 @@ table#graha_column th {
 					</params>
 				</where>
 			</table>
-			<table tableName="graha_column" name="graha_column">
+			<table tableName="graha_table.graha_column" name="graha_column">
 				<column name="graha_table_id" foreign="true" value="param.graha_table_id" datatype="int" />
 				<where>
 					<sql>
