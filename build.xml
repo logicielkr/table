@@ -2,7 +2,9 @@
 	<property name = "base.dir" value = "."/>
 	<property name = "app.name" value = "graha-table"/>
 	<property name = "app.version" value = "0.9.0.0"/>
+	<property name = "src.dir" value = "${base.dir}/src" />
 	<property name = "build.dir" value = "${base.dir}/bin" />
+	<property name = "tomcat10.dir" value = "${base.dir}/tomcat10"/>
 	<property name = "package.dir" value = "${base.dir}/package"/>
 	<presetdef name="javac">
 		<javac includeantruntime="false" />
