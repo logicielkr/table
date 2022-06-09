@@ -1,18 +1,29 @@
 ul.multitab,
 h3.graha_table,
-h3.graha_column
+h3.graha_column,
+h3.ddl_scripts
 {
 	display:none;
 }
-table#graha_table {
+table#graha_table,
+table#graha_column
+{
 	margin-bottom:10px;
 }
 
-table#graha_table th {
+table#graha_table th,
+table#ddl_scripts th
+{
 	width:120px;
 }
 table#graha_table td.contents,
-table#graha_table td.ddl_scripts
+table#ddl_scripts td.ddl_scripts_postgresql,
+table#ddl_scripts td.ddl_scripts_oracle,
+table#ddl_scripts td.ddl_scripts_h2,
+table#ddl_scripts td.ddl_scripts_hsql,
+table#ddl_scripts td.ddl_scripts_derby,
+table#ddl_scripts td.ddl_scripts_sqlite,
+table#ddl_scripts td.ddl_scripts_maria
 {
 	white-space:pre-wrap;
 	min-height:100px;
@@ -55,8 +66,20 @@ table#graha_table td.is_graha_style_pseudo_column {
 	}
 	table#graha_table th.contents,
 	table#graha_table td.contents,
-	table#graha_table th.ddl_scripts,
-	table#graha_table td.ddl_scripts,
+	table#ddl_scripts th.ddl_scripts_postgresql,
+	table#ddl_scripts td.ddl_scripts_postgresql,
+	table#ddl_scripts th.ddl_scripts_oracle,
+	table#ddl_scripts td.ddl_scripts_oracle,
+	table#ddl_scripts th.ddl_scripts_h2,
+	table#ddl_scripts td.ddl_scripts_h2,
+	table#ddl_scripts th.ddl_scripts_hsql,
+	table#ddl_scripts td.ddl_scripts_hsql,
+	table#ddl_scripts th.ddl_scripts_derby,
+	table#ddl_scripts td.ddl_scripts_derby,
+	table#ddl_scripts th.ddl_scripts_sqlite,
+	table#ddl_scripts td.ddl_scripts_sqlite,
+	table#ddl_scripts th.ddl_scripts_maria,
+	table#ddl_scripts td.ddl_scripts_maria,
 	table#graha_column th.contents,
 	table#graha_column td.contents
 	{

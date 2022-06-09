@@ -302,9 +302,6 @@
 						<column label="비고" name="contents" colspan="5" />
 					</row>
 					<row>
-						<column label="DDL Scripts" name="ddl_scripts" colspan="5" />
-					</row>
-					<row>
 						<column label="JNDI 이름" name="jndi" />
 						<column label="스키마이름" name="schema_name" />
 						<column label="업무구분" name="gbn" />
@@ -319,6 +316,29 @@
 						<column label="Key" name="is_primary_key" />
 						<column label="SEQ" name="is_sequence" />
 						<column label="비고" name="contents" />
+					</row>
+				</tab>
+				<tab name="ddl_scripts" label="DDL Scripts">
+					<row>
+						<column label="DDL Scripts(PostgreSQL)" name="ddl_scripts_postgresql" colspan="5" />
+					</row>
+					<row>
+						<column label="DDL Scripts(Oracle)" name="ddl_scripts_oracle" colspan="5" />
+					</row>
+					<row>
+						<column label="DDL Scripts(H2)" name="ddl_scripts_h2" colspan="5" />
+					</row>
+					<row>
+						<column label="DDL Scripts(HSQLDB)" name="ddl_scripts_hsql" colspan="5" />
+					</row>
+					<row>
+						<column label="DDL Scripts(Derby)" name="ddl_scripts_derby" colspan="5" />
+					</row>
+					<row>
+						<column label="DDL Scripts(Sqlite)" name="ddl_scripts_sqlite" colspan="5" />
+					</row>
+					<row>
+						<column label="DDL Scripts(MariaDB)" name="ddl_scripts_maria" colspan="5" />
 					</row>
 				</tab>
 			</middle>
