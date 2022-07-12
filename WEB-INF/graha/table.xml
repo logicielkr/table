@@ -73,8 +73,11 @@
 			</bottom>
 		</layout>
 	</query>
-	<query id="insert" funcType="insert" label="테이블">
+	<query id="insert" funcType="insert" label="테이블 추가">
 		<header>
+			<labels>
+				<label text="테이블 수정(${/document/rows/row/table_name})" cond="${param.graha_table_id} exists" />
+			</labels>
 			<style src="../../css/table.insert.css" />
 			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
 			<script src="../../js/table.insert.js" name="check_submit" override="true" />
