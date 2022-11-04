@@ -265,13 +265,18 @@ function getDDLScript(db_vendor) {
 		if(db_vendor == "maria") {
 			ddl_scripts += " COMMENT '고유번호'";
 		}
-		ddl_scripts += ",\n";
+		ddl_scripts += "\n";
 		if(support(db_vendor, "comment")) {
 			comments_scripts += "COMMENT ON COLUMN ";
 			comments_scripts += getSchemaName(db_vendor) + "" + $("table#graha_table td.table_name").text() + "." + $("table#graha_table td.table_name").text() + "_id IS '고유번호';\n";
 		}
 	}
+	var index = 0;
+	if($("table#graha_table td.is_graha_style_key").text() == "t") {
+		index++;
+	}
 	$("table#graha_column tbody tr td.column_name").each(function() {
+		index++;
 		if(is_graha_style_key($(this).text())) {
 		} else if(is_graha_style_pseudo_column($(this).text())) {
 		} else {
@@ -292,7 +297,11 @@ function getDDLScript(db_vendor) {
 				ddl_scripts += "\t" + $(this).text() + " " + getDataType(data_type, db_vendor) + "";
 			}
 			*/
-			ddl_scripts += "\t" + $(this).text() + " " + getDataType(data_type, db_vendor, length) + "";
+			ddl_scripts += "\t";
+			if(index > 1) {
+				ddl_scripts += ", ";
+			}
+			ddl_scripts += $(this).text() + " " + getDataType(data_type, db_vendor, length) + "";
 			if(db_vendor == "maria" && column_comments != "") {
 				ddl_scripts += " COMMENT '" + column_comments + "'";
 			}
@@ -316,7 +325,7 @@ function getDDLScript(db_vendor) {
 					}
 				}
 			}
-			ddl_scripts += ",\n";
+			ddl_scripts += "\n";
 			if(support(db_vendor, "comment") && column_comments != "") {
 				comments_scripts += "COMMENT ON COLUMN ";
 				comments_scripts += getSchemaName(db_vendor) + "" + $("table#graha_table td.table_name").text() + "." + $(this).text() + " IS '" + column_comments + "';\n";
@@ -324,36 +333,36 @@ function getDDLScript(db_vendor) {
 		}
 	});
 	if($("table#graha_table td.is_graha_style_pseudo_column").text() == "t") {
-		ddl_scripts += "\tinsert_date " + getDataType("timestamp", db_vendor) + "";
+		ddl_scripts += "\t, insert_date " + getDataType("timestamp", db_vendor) + "";
 		if(db_vendor == "maria") {
 			ddl_scripts += " COMMENT '작성일시'";
 		}
-		ddl_scripts += ",\n";
-		ddl_scripts += "\tinsert_id " + getDataType("varchar", db_vendor, 50) + "";
+		ddl_scripts += "\n";
+		ddl_scripts += "\t, insert_id " + getDataType("varchar", db_vendor, 50) + "";
 		if(db_vendor == "maria") {
 			ddl_scripts += " COMMENT '작성자ID'";
 		}
-		ddl_scripts += ",\n";
-		ddl_scripts += "\tinsert_ip " + getDataType("varchar", db_vendor, 15) + "";
+		ddl_scripts += "\n";
+		ddl_scripts += "\t, insert_ip " + getDataType("varchar", db_vendor, 15) + "";
 		if(db_vendor == "maria") {
 			ddl_scripts += " COMMENT '작성자IP'";
 		}
-		ddl_scripts += ",\n";
-		ddl_scripts += "\tupdate_date " + getDataType("timestamp", db_vendor) + "";
+		ddl_scripts += "\n";
+		ddl_scripts += "\t, update_date " + getDataType("timestamp", db_vendor) + "";
 		if(db_vendor == "maria") {
 			ddl_scripts += " COMMENT '최종수정일시'";
 		}
-		ddl_scripts += ",\n";
-		ddl_scripts += "\tupdate_id " + getDataType("varchar", db_vendor, 50) + "";
+		ddl_scripts += "\n";
+		ddl_scripts += "\t, update_id " + getDataType("varchar", db_vendor, 50) + "";
 		if(db_vendor == "maria") {
 			ddl_scripts += " COMMENT '최종수정자ID'";
 		}
-		ddl_scripts += ",\n";
-		ddl_scripts += "\tupdate_ip " + getDataType("varchar", db_vendor, 15) + "";
+		ddl_scripts += "\n";
+		ddl_scripts += "\t, update_ip " + getDataType("varchar", db_vendor, 15) + "";
 		if(db_vendor == "maria") {
 			ddl_scripts += " COMMENT '최종수정자IP'";
 		}
-		ddl_scripts += ",\n";
+		ddl_scripts += "\n";
 		if(support(db_vendor, "comment")) {
 			comments_scripts += "COMMENT ON COLUMN " + getSchemaName(db_vendor) + "" + $("table#graha_table td.table_name").text() + ".insert_date IS '작성일시';\n";
 			comments_scripts += "COMMENT ON COLUMN " + getSchemaName(db_vendor) + "" + $("table#graha_table td.table_name").text() + ".insert_id IS '작성자ID';\n";
@@ -363,12 +372,22 @@ function getDDLScript(db_vendor) {
 			comments_scripts += "COMMENT ON COLUMN " + getSchemaName(db_vendor) + "" + $("table#graha_table td.table_name").text() + ".update_ip IS '최종수정자IP';\n";
 		}
 	}
-	if(db_vendor != "sqlite") {
-		ddl_scripts += "\t";
+	var exists_pk = false;
+	if($("table#graha_table td.is_graha_style_key").text() == "t") {
+		exists_pk = true;
+	} else {
+		$("table#graha_column tbody tr td.is_primary_key").each(function() {
+			if($(this).text() == "t") {
+				exists_pk = true;
+			}
+		});
+	}
+	if(exists_pk && db_vendor != "sqlite") {
+		ddl_scripts += "\t, ";
 		if(db_vendor == "postgresql" || db_vendor == "oracle") {
 			ddl_scripts += "CONSTRAINT " + $("table#graha_table td.table_name").text() + "_pkey ";
 		}
-	
+		
 		ddl_scripts += "PRIMARY KEY (";
 		if($("table#graha_table td.is_graha_style_key").text() == "t") {
 			ddl_scripts += $("table#graha_table td.table_name").text() + "_id";
@@ -391,7 +410,7 @@ function getDDLScript(db_vendor) {
 		ddl_scripts += ")\n";
 	}
 	ddl_scripts += ")";
-	if(db_vendor == "postgresql") {
+	if(exists_pk && db_vendor == "postgresql") {
 		ddl_scripts += " WITH ( OIDS=FALSE )";
 	}
 	ddl_scripts += ";\n";
