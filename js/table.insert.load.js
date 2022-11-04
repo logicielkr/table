@@ -24,6 +24,7 @@ function loadFromDB() {
 				data: formData,
 				success: function(result) {
 					var obj = parse_graha_xml_document(result);
+					console.log(obj);
 					if(obj.results.err) {
 						alert("DB에서 불러오기 호출이 실패했습니다(" + obj.results.err + ")");
 					} else {
@@ -87,7 +88,7 @@ function loadFromDB() {
 									dataType = "text";
 								} else if(dataType == "bigint") {
 									dataType = "long";
-								} else if(dataType == "float") {
+								} else if(dataType == "real") {
 									dataType = "float";
 								} else if(dataType == "double") {
 									dataType = "double";
@@ -99,13 +100,13 @@ function loadFromDB() {
 									dataType = "timestamp";
 								}
 								$("table#graha_column td.graha_column\\.data_type select[name='graha_column.data_type." + (i + 1) + "'").val(dataType);
-								if(obj.results["character_maximum_length." + (i + 1)] > 0 && (dataType == "varchar" || dataType == "char")) {
+								if(obj.results["character_maximum_length." + (i + 1)] && obj.results["character_maximum_length." + (i + 1)] > 0 && (dataType == "varchar" || dataType == "char")) {
 									$("table#graha_column td.graha_column\\.length input[name='graha_column.length." + (i + 1) + "'").val(obj.results["character_maximum_length." + (i + 1)]);
 								}
-								if(obj.results["column_default." + (i + 1)].indexOf("(") > 0 && obj.results["column_default." + (i + 1)].substring(0, obj.results["column_default." + (i + 1)].indexOf("(")) == "nextval") {
+								if(obj.results["column_default." + (i + 1)] && obj.results["column_default." + (i + 1)].indexOf("(") > 0 && obj.results["column_default." + (i + 1)].substring(0, obj.results["column_default." + (i + 1)].indexOf("(")) == "nextval") {
 									$("table#graha_column td.graha_column\\.is_sequence input[name='graha_column.is_sequence." + (i + 1) + "'").attr("checked", true);
 								}
-								if(obj.results["is_pk_column." + (i + 1)] > 0) {
+								if(obj.results["is_pk_column." + (i + 1)] && obj.results["is_pk_column." + (i + 1)] > 0) {
 									$("table#graha_column td.graha_column\\.is_primary_key input[name='graha_column.is_primary_key." + (i + 1) + "'").attr("checked", true);
 									if(obj.results["column_name." + (i + 1)] == obj.results.table_name + "_id") {
 										exists_graha_style_key = true;
