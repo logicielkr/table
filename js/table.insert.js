@@ -27,6 +27,7 @@ $(document).ready(function() {
 	});
 });
 $(window).on("load", function() {
+/*
 	if(!$("table#graha_column th.graha_column\\.column_name").is(':visible')) {
 		$("table#graha_column td.graha_column\\.column_name input")
 		.add("table#graha_column td.graha_column\\.column_comments input")
@@ -67,6 +68,7 @@ $(window).on("load", function() {
 			});
 		});
 	}
+*/
 });
 function check_submit(form, msg) {
 	if(typeof(_check) == "function" && !_check(form)) {
@@ -77,6 +79,7 @@ function check_submit(form, msg) {
 			$(this).val("");
 			$(this).attr("disabled", false);
 		});
+/*
 		if(!$("table#graha_column th.graha_column\\.column_name").is(':visible')) {
 			$("table#graha_column td.graha_column\\.column_name input")
 			.add("table#graha_column td.graha_column\\.column_comments input")
@@ -88,6 +91,7 @@ function check_submit(form, msg) {
 				}
 			});
 		}
+*/
 		return true;
 	} else {
 		return false;
