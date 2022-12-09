@@ -14,6 +14,11 @@ table#graha_table th {
 table#graha_table textarea.contents {
 	height:100px;
 }
+@media only screen and (min-width: 600px) {
+	table#graha_column input::placeholder {
+		color: transparent;
+	}
+}
 @media only screen and (max-width: 600px) {
 	body {
 		margin:0px;
@@ -46,7 +51,7 @@ table#graha_table textarea.contents {
 	{
 		width: calc(100% - 125px);
 		width: -moz-calc(100% - 125px);
-		width: -webkit-calc(100% - 125px);
+		width: -webkit-calc(100% - 135px);
 	}
 	table#graha_table th.contents,
 	table#graha_table td.contents,

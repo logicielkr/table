@@ -189,10 +189,10 @@
 					</row>
 				</tab>
 				<tab name="graha_column" label="컬럼">
-						<column name="graha_column.graha_column_id" value="graha_column_id" type="hidden" />
+					<column name="graha_column.graha_column_id" value="graha_column_id" type="hidden" />
 					<row>
-						<column label="속성명" name="graha_column.column_comments" value="column_comments" />
-						<column label="속성ID" name="graha_column.column_name" value="column_name" />
+						<column label="속성명" name="graha_column.column_comments" value="column_comments" placeholder="속성명" />
+						<column label="속성ID" name="graha_column.column_name" value="column_name" placeholder="속성ID" />
 						<column label="자료형" name="graha_column.data_type" value="data_type" type="select">
 							<option value="" label="=====" />
 							<option value="varchar" label="varchar" />
@@ -206,10 +206,10 @@
 							<option value="double" label="double" />
 							<option value="boolean" label="boolean" />
 						</column>
-						<column label="길이" name="graha_column.length" value="length" />
+						<column label="길이" name="graha_column.length" value="length" placeholder="길이" />
 						<column label="Key" name="graha_column.is_primary_key" value="is_primary_key" type="checkbox" val="t" />
 						<column label="SEQ" name="graha_column.is_sequence" value="is_sequence" type="checkbox" val="t" />
-						<column label="비고" name="graha_column.contents" value="contents" />
+						<column label="비고" name="graha_column.contents" value="contents" placeholder="비고" />
 						<column label="삭제" name="graha_column.del" value="삭제" type="button" />
 					</row>
 				</tab>
