@@ -75,7 +75,7 @@
 				<label text="테이블 수정(${/document/rows/row/table_name})" cond="${param.graha_table_id} exists" />
 			</labels>
 			<style src="../../css/table.insert.css" />
-			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
+			<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
 			<script src="../../js/table.insert.js" name="check_submit" override="true" />
 			<script src="../../js/table.insert.load.js" />
 			<script src="//graha.kr/static-contents/client_lib/formula/0.5.0.0/GrahaFormula.js" />
@@ -222,7 +222,7 @@
 	<query id="detail" funcType="detail" label="테이블(${/document/rows/row/table_name})">
 		<header>
 			<style src="../../css/table.detail.css" />
-			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
+			<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
 			<script src="../../js/table.detail.js" />
 		</header>
 		<commands>
@@ -355,7 +355,7 @@
 	<query id="detail_mobile" funcType="detail" label="테이블(${/document/rows/row/table_name})" extends="detail">
 		<header>
 			<style src="../../css/table.detail.css" />
-			<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
+			<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" />
 			<script src="../../js/table.detail.js" />
 			<style>
 table#graha_column th {
