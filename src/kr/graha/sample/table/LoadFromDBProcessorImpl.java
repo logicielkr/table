@@ -23,8 +23,8 @@ package kr.graha.sample.table;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import kr.graha.lib.Processor;
-import kr.graha.lib.Record;
+import kr.graha.post.interfaces.Processor;
+import kr.graha.post.lib.Record;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import kr.graha.helper.LOG;
@@ -42,7 +42,7 @@ import java.util.List;
  * 
  * @author HeonJik, KIM
  
- * @see kr.graha.lib.Processor
+ * @see kr.graha.post.interfaces.Processor
  
  * @version 0.9
  * @since 0.9
@@ -66,55 +66,55 @@ public class LoadFromDBProcessorImpl implements Processor {
  * @see jakarta.servlet.http.HttpServletRequest (Apache Tomcat 10 이상)
  * @see javax.servlet.http.HttpServletResponse (Apache Tomcat 10 미만)
  * @see jakarta.servlet.http.HttpServletResponse (Apache Tomcat 10 이상)
- * @see kr.graha.lib.Record 
+ * @see kr.graha.post.lib.Record 
  * @see java.sql.Connection 
  */
 	public void execute(HttpServletRequest request, HttpServletResponse response, Record params, Connection con) {
 		Connection conn = null;
 		try {
-			if(!params.hasKey("param.jndi")) {
-				params.put("result.err", "jndi parameter is empty!!!");
+			if(!params.hasKey(Record.key(Record.PREFIX_TYPE_PARAM, "jndi"))) {
+				params.put(Record.key(Record.PREFIX_TYPE_RESULT, "err"), "jndi parameter is empty!!!");
 			} else {
-				conn = DB.getConnection(params.getString("param.jndi"));
+				conn = DB.getConnection(params.getString(Record.key(Record.PREFIX_TYPE_PARAM, "jndi")));
 				if(conn == null) {
-					params.put("result.err", "fail database connection!!! check jndi parameter!!!");
+					params.put(Record.key(Record.PREFIX_TYPE_RESULT, "err"), "fail database connection!!! check jndi parameter!!!");
 				} else {
-					TableInfo tableInfo = getTableInfo(conn, params.getString("param.table_name"), params.getString("param.jndi"), params.getString("param.schema_name"));
-					List columns = getColumnInfo(conn, params.getString("param.table_name"), params.getString("param.jndi"), params.getString("param.schema_name"));
+					TableInfo tableInfo = getTableInfo(conn, params.getString(Record.key(Record.PREFIX_TYPE_PARAM, "table_name")), params.getString(Record.key(Record.PREFIX_TYPE_PARAM, "jndi")), params.getString(Record.key(Record.PREFIX_TYPE_PARAM, "schema_name")));
+					List columns = getColumnInfo(conn, params.getString(Record.key(Record.PREFIX_TYPE_PARAM, "table_name")), params.getString(Record.key(Record.PREFIX_TYPE_PARAM, "jndi")), params.getString(Record.key(Record.PREFIX_TYPE_PARAM, "schema_name")));
 					if(tableInfo != null && columns != null && columns.size() > 0) {
 						if(tableInfo.getTableSchema() != null) {
-							params.put("result.table_schema", tableInfo.getTableSchema());
+							params.put(Record.key(Record.PREFIX_TYPE_RESULT, "table_schema"), tableInfo.getTableSchema());
 						}
-						params.put("result.table_name", tableInfo.getTableName());
+						params.put(Record.key(Record.PREFIX_TYPE_RESULT, "table_name"), tableInfo.getTableName());
 						if(tableInfo.getTableComments() != null) {
-							params.put("result.table_comments", tableInfo.getTableComments());
+							params.put(Record.key(Record.PREFIX_TYPE_RESULT, "table_comments"), tableInfo.getTableComments());
 						}
 						for(int i = 0; i < columns.size(); i++) {
 							ColumnInfo columnInfo = (ColumnInfo)columns.get(i);
-							params.put("result.column_name." + (i + 1), columnInfo.getColumnName());
+							params.put(Record.key(Record.PREFIX_TYPE_RESULT, "column_name." + (i + 1)), columnInfo.getColumnName());
 							if(columnInfo.getColumnComments() != null) {
-								params.put("result.column_comments." + (i + 1), columnInfo.getColumnComments());
+								params.put(Record.key(Record.PREFIX_TYPE_RESULT, "column_comments." + (i + 1)), columnInfo.getColumnComments());
 							}
-							params.put("result.ordinal_position." + (i + 1), columnInfo.getOrdinalPosition());
-							params.put("result.column_default." + (i + 1), columnInfo.getColumnDefault());
-							params.put("result.is_nullable." + (i + 1), columnInfo.getIsNullable());
-							params.put("result.data_type." + (i + 1), columnInfo.getDataType());
-							params.put("result.character_maximum_length." + (i + 1), columnInfo.getCharacterMaximumLength());
-							params.put("result.is_pk_column." + (i + 1), columnInfo.getIsPkColumn());
+							params.put(Record.key(Record.PREFIX_TYPE_RESULT, "ordinal_position." + (i + 1)), columnInfo.getOrdinalPosition());
+							params.put(Record.key(Record.PREFIX_TYPE_RESULT, "column_default." + (i + 1)), columnInfo.getColumnDefault());
+							params.put(Record.key(Record.PREFIX_TYPE_RESULT, "is_nullable." + (i + 1)), columnInfo.getIsNullable());
+							params.put(Record.key(Record.PREFIX_TYPE_RESULT, "data_type." + (i + 1)), columnInfo.getDataType());
+							params.put(Record.key(Record.PREFIX_TYPE_RESULT, "character_maximum_length." + (i + 1)), columnInfo.getCharacterMaximumLength());
+							params.put(Record.key(Record.PREFIX_TYPE_RESULT, "is_pk_column." + (i + 1)), columnInfo.getIsPkColumn());
 						}
-						params.put("result.record_count", columns.size());
+						params.put(Record.key(Record.PREFIX_TYPE_RESULT, "record_count"), columns.size());
 					} else {
-						params.put("result.err", "fail fetch table info!!!");
+						params.put(Record.key(Record.PREFIX_TYPE_RESULT, "err"), "fail fetch table info!!!");
 					}
 				}
 				DB.close(conn);
 			}
 		} catch (SQLException e) {
 			if(logger.isLoggable(Level.SEVERE)) { logger.severe(LOG.toString(e)); }
-			params.put("result.err", LOG.toString(e));
-			params.put("result.error_message", e.getMessage());
-			params.put("result.error_code", e.getErrorCode());
-			params.put("result.sql_state", e.getSQLState());
+			params.put(Record.key(Record.PREFIX_TYPE_RESULT, "err"), LOG.toString(e));
+			params.put(Record.key(Record.PREFIX_TYPE_RESULT, "error_message"), e.getMessage());
+			params.put(Record.key(Record.PREFIX_TYPE_RESULT, "error_code"), e.getErrorCode());
+			params.put(Record.key(Record.PREFIX_TYPE_RESULT, "sql_state"), e.getSQLState());
 		} finally {
 			DB.close(conn);
 		}
