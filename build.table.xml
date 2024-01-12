@@ -1,4 +1,4 @@
-<project name="table" default="package-tar">
+<project name="build.table">
 	<property name = "base.dir" value = "."/>
 	<property name = "app.name" value = "graha-table"/>
 	<property name = "app.version" value = "0.9.0.0"/>
