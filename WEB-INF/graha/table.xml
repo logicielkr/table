@@ -1,9 +1,103 @@
 <querys>
 	<header extends="_base.xml">
+		<prop name="project_supported" value="false" />
+		<prop name="category_supported" value="false" />
+		<prop name="authentication_type" value="login_name" />
+		<!--
+		<prop name="authentication_type" value="role_name" />
+		<prop name="authentication_type" value="none" />
+		-->
+		<prop name="table_name" value="graha_table.graha_table" />
+		<prop name="column_table_name" value="graha_table.graha_column" />
+		<prop name="sequence_name" value="graha_table.graha_table$graha_table_id" />
+		<prop name="column_sequence_name" value="graha_table.graha_column$graha_column_id" />
+		<prop name="project_table_name" value="project.project" />
+		
+		<prop name="user_role_table_name" value="common.graha_user_role" />
+		<prop name="login_name_column_name" value="login_name" />
+		<prop name="role_name_column_name" value="role_name" />
+		
+		<prop name="project_id" value="${param.project_id}" cond="${prop.project_supported} equals 'true'" public="true" />
+		
+		<prop name="category" value="${param.category}" cond="${prop.category_supported} equals 'true'" public="true" />
+		<codes>
+			<code name="category" label="상태" cond="${prop.category_supported} equals 'true'" override="true">
+				<option value="O" label="Open" />
+				<option value="C" label="Close" />
+				<option value="R" label="Release" />
+				<option value="F" label="Finish" />
+				<option value="H" label="Hold" />
+				<option value="D" label="Discard" />
+			</code>
+		</codes>
 	</header>
-	<query id="list" funcType="list" label="테이블">
+	<query id="list" funcType="list" label="${prop.app.label}">
 		<header>
 			<style src="../../css/table.list.css" />
+			<!--
+			<codes>
+				<code name="category_abbr" label="상태" cond="${prop.category_supported} equals 'true'" override="true">
+					<option value="O" label="[ ]" />
+					<option value="C" label="[√]" />
+					<option value="R" label="[R]" />
+					<option value="F" label="[F]" />
+					<option value="H" label="[H]" />
+					<option value="D" label="[x]" />
+				</code>
+			</codes>
+-->
+			<prop name="category.code" value="abbr" cond="${code.category_abbr.firstValue} exists" time="after" public="true" />
+			<prop name="category.code" value="normal" cond="${code.category_abbr.firstValue} empty" time="after" public="true" />
+			<prop name="category.code" value="unsupported" cond="${prop.category_supported} != 'true'" time="after" public="true" />
+
+			<top position="above" cond="${prop.category_supported} equals 'true'"><![CDATA[
+<ul class="category">
+	<xsl:variable name="hrefparam"><xsl:if test="/document/params[@for = 'data']/project_id and /document/params[@for = 'data']/project_id != ''">project_id=<xsl:value-of select="/document/params[@for = 'data']/project_id" /></xsl:if><xsl:if test="/document/params[@for = 'data']/search and /document/params[@for = 'data']/search != ''"><xsl:if test="/document/params[@for = 'data']/project_id and /document/params[@for = 'data']/project_id != ''">&amp;</xsl:if>search=<xsl:value-of select="/document/params[@for = 'data']/search" /></xsl:if></xsl:variable>
+	<li>
+		<xsl:if test="not(/document/props/category)"><xsl:attribute name="class">selected</xsl:attribute></xsl:if>
+		<a>
+			<xsl:attribute name="href">list.html<xsl:if test="$hrefparam and $hrefparam != ''">?<xsl:value-of select="$hrefparam" /></xsl:if></xsl:attribute>
+			All
+		</a>
+	</li>
+	<xsl:for-each select="/document/code[@name='category']/option">
+		<li>
+			<xsl:if test="/document/props/category = @value"><xsl:attribute name="class">selected</xsl:attribute></xsl:if>
+			<a>
+				<xsl:attribute name="href">list.html?category=<xsl:value-of select="@value" /><xsl:if test="$hrefparam and $hrefparam != ''">&amp;<xsl:value-of select="$hrefparam" /></xsl:if></xsl:attribute>
+				<xsl:value-of select="@label" />
+			</a>
+		</li>
+	</xsl:for-each>
+</ul>
+			]]></top>
+			<style cond="${prop.category_supported} equals 'true'">
+ul.category {
+	display:block;
+	clear:both;
+	z-index:1;
+}
+ul.category li {
+	list-style-type: none;
+	float:left;
+	padding:10px 20px 10px 20px;
+	margin-bottom:5px;
+	margin-right:3px;
+	background-color: #ccc;
+	z-index:1;
+}
+ul.category li.selected {
+	background-color: orange;
+	z-index:1;
+}
+<![CDATA[<xsl:if test="/document/props/category.code = 'abbr'">
+table#graha_table th.category, 
+table#graha_table td.category {
+	width:50px;
+	text-align:center;
+}
+</xsl:if>]]>
+			</style>
 		</header>
 		<commands>
 			<command name="graha_table">
@@ -16,52 +110,115 @@
 						, jndi
 						, schema_name
 						, gbn
-					from graha_table.graha_table
-					where insert_id = ?
+<tile cond="${prop.category_supported} equals 'true'">
+						, category
+</tile>
+<tile cond="${prop.project_supported} equals 'true'">
+						, project.name as project_name
+					from <entity>${prop.table_name}</entity> as graha_table
+					left outer join <entity>${prop.project_table_name}</entity> as project on graha_table.project_id = project.project_id
+</tile>
+<tile  cond="${prop.project_supported} != 'true'">
+					from <entity>${prop.table_name}</entity> as graha_table
+</tile>
+					where 1 = 1
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and graha_table.insert_id = ?
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select *
+							from <entity>${prop.user_role_table_name}</entity> _a
+							inner join <entity>${prop.user_role_table_name}</entity> _b 
+							on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where _a.<entity>${prop.login_name_column_name}</entity> = graha_table.insert_id
+						)
+</tile>
 <tile cond="${param.search} isNotEmpty">
 					and (table_name like '%' || ? || '%' or table_comments like '%' || ? || '%' or contents like '%' || ? || '%')
 </tile>
-					order by graha_table_id desc
+<tile cond="${prop.category} isNotEmpty">
+					and graha_table.category = ?
+</tile>
+<tile cond="${prop.project_id} isNotEmpty">
+					and graha_table.project_id = ?
+</tile>
+					order by graha_table.insert_date desc
 				</sql>
 				<sql_cnt>
-					select count(*) from graha_table.graha_table
-					where insert_id = ?
+					select count(*) from <entity>${prop.table_name}</entity> as graha_table
+					where 1 = 1
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and graha_table.insert_id = ?
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select *
+							from <entity>${prop.user_role_table_name}</entity> _a
+							inner join <entity>${prop.user_role_table_name}</entity> _b 
+							on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where _a.<entity>${prop.login_name_column_name}</entity> = graha_table.insert_id
+						)
+</tile>
 <tile cond="${param.search} isNotEmpty">
 					and (table_name like '%' || ? || '%' or table_comments like '%' || ? || '%' or contents like '%' || ? || '%')
+</tile>
+<tile cond="${prop.category} isNotEmpty">
+					and graha_table.category = ?
+</tile>
+<tile cond="${prop.project_id} isNotEmpty">
+					and graha_table.project_id = ?
 </tile>
 				</sql_cnt>
 				<params>
-					<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'login_name'" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'role_name'" />
 					<param name="search" datatype="varchar" value="param.search" default="%" cond="${param.search} isNotEmpty" />
 					<param name="search" datatype="varchar" value="param.search" default="%" cond="${param.search} isNotEmpty" />
 					<param name="search" datatype="varchar" value="param.search" default="%" cond="${param.search} isNotEmpty" />
+					<param name="category" datatype="varchar" value="prop.category" cond="${prop.category} isNotEmpty" />
+					<param name="project_id" datatype="int" value="prop.project_id" cond="${prop.project_id} isNotEmpty" />
 				</params>
 			</command>
 		</commands>
 		<layout>
 			<top>
 				<left>
-					<link name="insert" label="추가" path="/table/insert" />
+					<link name="insert" label="추가" path="insert">
+						<params>
+							<param name="category" value="category" type="prop" hidden="true" />
+							<param name="project_id" value="project_id" type="prop" hidden="true" />
+						</params>
+					</link>
 				</left>
 			</top>
 			<middle>
 				<tab name="graha_table">
+					<column label="프로젝트" name="project_name" cond="${prop.project_supported} equals 'true'" />
+					<column label="분류" name="category" cond="${prop.category.code} equals 'normal'" code="true" for="category" />
+					<column name="category" cond="${prop.category.code} equals 'abbr'" code="true" for="category_abbr" />
 					<column label="테이블이름" name="table_name">
-						<link path="/table/detail">
+						<link path="detail">
 							<param name="graha_table_id" type="query" value="graha_table_id" />
 							<param name="page" type="param" value="page" />
+							<param name="category" value="category" type="prop" />
+							<param name="project_id" value="project_id" type="prop" />
 						</link>
 					</column>
 					<column label="테이블이름" name="table_name_mobile">
-						<link path="/table/detail_mobile">
+						<link path="detail_mobile">
 							<param name="graha_table_id" type="query" value="graha_table_id" />
 							<param name="page" type="param" value="page" />
+							<param name="category" value="category" type="prop" />
+							<param name="project_id" value="project_id" type="prop" />
 						</link>
 					</column>
 					<column label="테이블설명" name="table_comments" />
 					<column label="JNDI 이름" name="jndi" />
 					<column label="스키마이름" name="schema_name" />
+<!--
 					<column label="업무구분" name="gbn" />
+-->
 				</tab>
 			</middle>
 			<bottom>
@@ -69,11 +226,51 @@
 			</bottom>
 		</layout>
 	</query>
-	<query id="insert" funcType="insert" label="테이블 추가">
+	<query id="insert" funcType="insert" label="${prop.app.label} 추가">
 		<header>
 			<labels>
-				<label text="테이블 수정(${/document/rows/row/table_name})" cond="${param.graha_table_id} exists" />
+				<label text="${prop.app.label} 수정(${/document/rows/row/table_name})" cond="${param.graha_table_id} exists" />
 			</labels>
+			<prop name="oproject_id" value="${param.oproject_id}" cond="${prop.project_supported} equals 'true'" />
+			<prop name="project.supported" value="g" cond="${header.method} equals 'GET'" />
+			<prop name="project.supported" value="${prop.project.supported}s" cond="${prop.project_supported} equals 'true'" />
+			<prop name="project.supported" value="${prop.project.supported}p" cond="${param.parent_id} isEmpty" />
+			<codes>
+				<code name="project" cond="${prop.project.supported} equals 'gsp'">
+					<sql>
+						select project_id as value, name as label from <entity>${prop.project_table_name}</entity> order by order_number asc nulls first
+					</sql>
+				</code>
+			</codes>
+			<prop name="project.using" value="query" cond="${param.graha_table_id} isNotEmpty" />
+			<prop name="project.using" value="param" cond="${param.graha_table_id} isEmpty" />
+			<prop name="project.using" value="${prop.project.using}Y" cond="${prop.project.supported} equals 'gsp'" />
+			<prop name="project.project_id" value="${query.graha_table.project_id}" time="after" cond="${prop.project.using} equals 'queryY'" public="true" />
+			<prop name="project.project_id" value="${param.project_id}" cond="${prop.project.using} equals 'paramY'" public="true" />
+			
+			<prop name="project.parent" value="query" cond="${param.graha_table_id} isNotEmpty" />
+			<prop name="project.parent" value="param" cond="${param.graha_table_id} isEmpty" />
+			<prop name="project.parent" value="${prop.project.parent}Y" cond="${prop.project.supported} equals 'gs'" />
+			<prop name="project.parent_project_id" value="${query.graha_table.project_id}" time="after" cond="${prop.project.parent} equals 'queryY'" public="true" />
+			<prop name="project.parent_project_id" value="${param.parent_project_id}" cond="${prop.project.parent} equals 'paramY'" public="true" />
+			
+			<prop name="ocategory" value="${param.ocategory}" cond="${prop.category_supported} equals 'true'" />
+			<prop name="category.supported" value="g" cond="${header.method} equals 'GET'" />
+			<prop name="category.supported" value="${prop.category.supported}s" cond="${prop.category_supported} equals 'true'" />
+			<prop name="category.supported" value="${prop.category.supported}p" cond="${param.parent_id} isEmpty" />
+			
+			<prop name="category.using" value="query" cond="${param.graha_table_id} isNotEmpty" />
+			<prop name="category.using" value="param" cond="${param.graha_table_id} isEmpty" />
+			<prop name="category.using" value="${prop.category.using}Y" cond="${prop.category.supported} equals 'gsp'" />
+			<prop name="category.category" value="${query.graha_table.category}" time="after" cond="${prop.category.using} equals 'queryY'" public="true" />
+			<prop name="category.category" value="${param.category}" cond="${prop.category.using} equals 'paramY'" public="true" />
+			
+			<prop name="category.parent" value="query" cond="${param.graha_table_id} isNotEmpty" />
+			<prop name="category.parent" value="param" cond="${param.graha_table_id} isEmpty" />
+			<prop name="category.parent" value="${prop.category.parent}Y" cond="${prop.category.supported} equals 'gs'" />
+			<prop name="category.parent_category" value="${query.graha_table.category}" time="after" cond="${prop.category.parent} equals 'queryY'" public="true" />
+			<prop name="category.parent_category" value="${param.parent_category}" cond="${prop.category.parent} equals 'paramY'" public="true" />
+			
 			<style src="../../css/table.insert.css" />
 			<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" name="jquery" override="true" preload="true" />
 			<script src="../../js/table.insert.js" name="check_submit" override="true" />
@@ -94,14 +291,16 @@
 			<param name="graha_column.length.{N}" form="insert" event="blur submit" expr="trim(graha_column.length.{N})" />
 		</calculator>
 		<tables>
-			<table tableName="graha_table.graha_table" name="graha_table" label="테이블">
-				<column name="graha_table_id" value="param.graha_table_id" datatype="int"  primary="true"  insert="sequence.nextval('graha_table.graha_table$graha_table_id')" />
+			<table tableName="${prop.table_name}" name="graha_table" label="${prop.app.label}">
+				<column name="graha_table_id" value="param.graha_table_id" datatype="int"  primary="true"  insert="sequence.nextval('${prop.sequence_name}')" />
 				<column name="table_name" value="param.table_name" datatype="varchar" />
 				<column name="table_comments" value="param.table_comments" datatype="varchar" />
 				<column name="contents" value="param.contents" datatype="varchar" />
 				<column name="jndi" value="param.jndi" datatype="varchar" />
 				<column name="schema_name" value="param.schema_name" datatype="varchar" />
 				<column name="gbn" value="param.gbn" datatype="varchar" />
+				<column name="category" value="param.category" datatype="varchar" cond="${prop.category_supported} equals 'true'" />
+				<column name="project_id" value="param.project_id" datatype="int" cond="${prop.project_supported} equals 'true'" />
 				<column name="insert_date" only="insert" value="sql.now()" datatype="timestamp" />
 				<column name="insert_id" only="insert" value="prop.logined_user" datatype="varchar" />
 				<column name="insert_ip" only="insert" value="header.remote_addr" datatype="varchar" />
@@ -112,15 +311,28 @@
 				<column name="is_graha_style_pseudo_column" value="param.is_graha_style_pseudo_column" datatype="boolean" />
 				<where>
 					<sql>
-						insert_id = ?
+						1 = 1
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and graha_table.insert_id = ?
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select *
+							from <entity>${prop.user_role_table_name}</entity> _a
+							inner join <entity>${prop.user_role_table_name}</entity> _b 
+							on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where _a.<entity>${prop.login_name_column_name}</entity> = graha_table.insert_id
+						)
+</tile>
 					</sql>
 					<params>
-						<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'login_name'" />
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'role_name'" />
 					</params>
 				</where>
 			</table>
-			<table tableName="graha_table.graha_column" name="graha_column" label="컬럼"  multi="true" append="5">
-				<column name="graha_column_id" value="param.graha_column.graha_column_id" datatype="int"  primary="true"  insert="sequence.nextval('graha_table.graha_column$graha_column_id')" />
+			<table tableName="${prop.column_table_name}" name="graha_column" label="컬럼"  multi="true" append="5">
+				<column name="graha_column_id" value="param.graha_column.graha_column_id" datatype="int"  primary="true"  insert="sequence.nextval('${prop.column_sequence_name}')" />
 				<column name="column_comments" value="param.graha_column.column_comments" datatype="varchar" />
 				<column name="column_name" value="param.graha_column.column_name" datatype="varchar" />
 				<column name="data_type" value="param.graha_column.data_type" datatype="varchar" />
@@ -137,10 +349,26 @@
 				<column name="update_ip" value="header.remote_addr" datatype="varchar" />
 				<where>
 					<sql>
-						insert_id = ?
+						1 = 1
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and exists (
+							select * from <entity>${prop.table_name}</entity> as graha_table where graha_table.graha_table_id = graha_column.graha_table_id
+							and graha_table.insert_id = ?
+						)
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select * from <entity>${prop.table_name}</entity> as graha_table
+								inner join <entity>${prop.user_role_table_name}</entity> _a on _a.login_name = graha_table.insert_id
+								inner join <entity>${prop.user_role_table_name}</entity> _b 
+									on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where graha_table.graha_table_id = graha_column.graha_table_id
+						)
+</tile>
 					</sql>
 					<params>
-						<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'login_name'" />
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'role_name'" />
 					</params>
 				</where>
 				<order>graha_column_id</order>
@@ -149,24 +377,36 @@
 		<layout msg="변경사항을 저장하시겠습니까?">
 			<top>
 				<left>
-					<link name="list" label="목록" path="/table/list">
+					<link name="list" label="목록" path="list">
 						<params>
 							<param name="page" type="param" value="page" />
+							<param name="category" value="category" type="prop" />
+							<param name="project_id" value="project_id" type="prop" />
 						</params>
 					</link>
 				</left>
 				<center />
 				<right>
-					<link name="save" label="저장" path="/table/insert" method="post" type="submit" full="true">
+					<link name="save" label="저장" path="insert" method="post" type="submit" full="true">
 						<params>
 							<param name="graha_table_id" type="query" value="graha_table_id" />
 							<param name="page" type="param" value="page" />
+							<param name="oproject_id" type="prop" value="project_id" cond="${prop.project_supported} equals 'true'" />
+							<param name="ocategory" type="prop" value="category" cond="${prop.category_supported} equals 'true'" />
+							<param name="project_id" type="prop" value="project.parent_project_id" cond="${prop.project.supported} equals 'gs'" />
+							<param name="category" type="prop" value="category.parent_category" cond="${prop.category.supported} equals 'gs'" />
 						</params>
 					</link>
 				</right>
 			</top>
 			<middle>
-				<tab name="graha_table" label="테이블">
+				<tab name="graha_table" label="${prop.app.label}">
+					<row cond="${prop.project.supported} equals 'gsp'">
+						<column label="프로젝트" name="project_id" value="prop.project.project_id" colspan="5" type="select" for="project" />
+					</row>
+					<row cond="${prop.category.supported} equals 'gsp'">
+						<column label="분류" name="category" value="prop.category.category" colspan="5" type="select" for="category" />
+					</row>
 					<row>
 						<column label="테이블이름" name="table_name" value="table_name" colspan="3" />
 						<column label="Graha PK" name="is_graha_style_key" value="is_graha_style_key" type="checkbox" val="t" />
@@ -215,12 +455,29 @@
 				</right>
 			</bottom>
 		</layout>
-		<redirect path="/table/list">
+		<redirect path="list">
 			<param name="page" type="param" value="page" />
+			<param name="category" value="ocategory" type="prop" />
+			<param name="project_id" value="oproject_id" type="prop" />
 		</redirect>
 	</query>
-	<query id="detail" funcType="detail" label="테이블(${/document/rows/row/table_name})">
+	<query id="detail" funcType="detail" label="${prop.app.label}(${/document/rows/row/table_name})">
 		<header>
+			<prop name="project.supported" value="g" cond="${header.method} equals 'GET'" />
+			<prop name="project.supported" value="${prop.project.supported}s" cond="${prop.project_supported} equals 'true'" />
+			<prop name="project.supported" value="${prop.project.supported}p" cond="${param.parent_id} isEmpty" />
+			<codes>
+				<code name="project" cond="${prop.project_supported} equals 'true'">
+					<sql>
+						select project_id as value, name as label from <entity>${prop.project_table_name}</entity> order by order_number asc nulls first
+					</sql>
+				</code>
+			</codes>
+			
+			<prop name="category.supported" value="g" cond="${header.method} equals 'GET'" />
+			<prop name="category.supported" value="${prop.category.supported}s" cond="${prop.category_supported} equals 'true'" />
+			<prop name="category.supported" value="${prop.category.supported}p" cond="${param.parent_id} isEmpty" />
+			
 			<style src="../../css/table.detail.css" />
 			<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" name="jquery" override="true" preload="true" />
 			<script src="../../js/table.detail.js" />
@@ -236,14 +493,33 @@
 						, jndi
 						, schema_name
 						, gbn
+<tile cond="${prop.category_supported} equals 'true'">
+						, category
+</tile>
+<tile cond="${prop.project_supported} equals 'true'">
+						, project_id
+</tile>
 						, is_graha_style_key
 						, is_graha_style_pseudo_column
-					from graha_table.graha_table
-						where graha_table_id = ? and insert_id = ?
+					from <entity>${prop.table_name}</entity> as graha_table
+						where graha_table_id = ?
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and graha_table.insert_id = ?
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select *
+							from <entity>${prop.user_role_table_name}</entity> _a
+							inner join <entity>${prop.user_role_table_name}</entity> _b 
+							on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where _a.<entity>${prop.login_name_column_name}</entity> = graha_table.insert_id
+						)
+</tile>
 				</sql>
 				<params>
 					<param default="null" name="graha_table_id" datatype="int" value="param.graha_table_id" />
-					<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'login_name'" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'role_name'" />
 				</params>
 			</command>
 			<command name="graha_column"  multi="true">
@@ -258,37 +534,74 @@
 						, is_sequence
 						, contents
 						, graha_table_id
-					from graha_table.graha_column
-						where graha_table_id = ? and insert_id = ?
+					from <entity>${prop.column_table_name}</entity> as graha_column
+						where graha_table_id = ?
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and exists (
+							select * from <entity>${prop.table_name}</entity> as graha_table where graha_table.graha_table_id = graha_column.graha_table_id
+							and graha_table.insert_id = ?
+						)
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select * from <entity>${prop.table_name}</entity> as graha_table
+								inner join <entity>${prop.user_role_table_name}</entity> _a on _a.login_name = graha_table.insert_id
+								inner join <entity>${prop.user_role_table_name}</entity> _b 
+									on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where graha_table.graha_table_id = graha_column.graha_table_id
+						)
+</tile>
 						order by graha_column_id
 				</sql>
 				<params>
 					<param default="null" name="graha_table_id" datatype="int" value="param.graha_table_id" />
-					<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'login_name'" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'role_name'" />
 				</params>
 			</command>
 		</commands>
 		<layout>
 			<top>
 				<left>
-					<link name="list" label="목록" path="/table/list">
+					<link name="list" label="목록" path="list">
 						<params>
 							<param name="page" type="param" value="page" />
+							<param name="category" value="category" type="prop" />
+							<param name="project_id" value="project_id" type="prop" />
 						</params>
 					</link>
 				</left>
-				<center />
+				<center>
+					<search name="project" label="변경" path="project" method="post" cond="${prop.project.supported} equals 'gsp'">
+						<params>
+							<param name="graha_table_id" type="query" value="graha_table.graha_table_id" hidden="true" />
+							<param name="parent_id" type="query" value="graha_table.parent_id" hidden="true" />
+							<param name="page" type="param" value="page" hidden="true" />
+							<param name="search" type="param" value="search" hidden="true" />
+							<param name="category" value="category" type="prop" hidden="true" />
+							<param name="project_id" type="select" value="query.project_id" for="project" />
+						</params>
+					</search>
+				</center>
 				<right>
-					<link name="update" label="수정" path="/table/insert">
+					<link name="update" label="수정" path="insert">
 						<params>
 							<param name="graha_table_id" type="query" value="graha_table_id" />
 							<param name="page" type="param" value="page" />
+							<param name="category" value="category" type="prop" />
+							<param name="project_id" value="project_id" type="prop" />
 						</params>
 					</link>
 				</right>
 			</top>
 			<middle>
-				<tab name="graha_table" label="테이블">
+				<tab name="graha_table" label="${prop.app.label}">
+					<row cond="${prop.project_supported} equals 'true'">
+						<column label="프로젝트" name="project_id" colspan="5" code="true" for="project" />
+					</row>
+					<row cond="${prop.category_supported} equals 'true'">
+						<column label="분류" name="category" colspan="5" code="true" for="category" />
+					</row>
 					<row>
 						<column label="테이블이름" name="table_name" colspan="3" />
 						<column label="Graha PK" name="is_graha_style_key" />
@@ -343,17 +656,46 @@
 			</middle>
 			<bottom>
 				<left>
-					<link label="삭제" path="/table/delete" method="post" type="submit" msg="정말로 삭제하시겠습니까?">
+					<link label="삭제" path="delete" method="post" type="submit" msg="정말로 삭제하시겠습니까?">
 						<params>
 							<param name="graha_table_id" type="query" value="graha_table_id" />
+							<param name="category" value="category" type="prop" />
+							<param name="project_id" value="project_id" type="prop" />
 						</params>
 					</link>
 				</left>
+				<center>
+					<search name="category" label="변경" path="category" method="post" cond="${prop.category.supported} equals 'gsp'">
+						<params>
+							<param name="graha_table_id" type="query" value="graha_table.graha_table_id" hidden="true" />
+							<param name="parent_id" type="query" value="graha_table.parent_id" hidden="true" />
+							<param name="page" type="param" value="page" hidden="true" />
+							<param name="search" type="param" value="search" hidden="true" />
+							<param name="project_id" value="project_id" type="prop" hidden="true" />
+							<param name="category" type="select" value="query.category" for="category" />
+						</params>
+					</search>
+				</center>
 			</bottom>
 		</layout>
 	</query>
-	<query id="detail_mobile" funcType="detail" label="테이블(${/document/rows/row/table_name})" extends="detail">
+	<query id="detail_mobile" funcType="detail" label="${prop.app.label}(${/document/rows/row/table_name})" extends="detail">
 		<header>
+			<prop name="project.supported" value="g" cond="${header.method} equals 'GET'" />
+			<prop name="project.supported" value="${prop.project.supported}s" cond="${prop.project_supported} equals 'true'" />
+			<prop name="project.supported" value="${prop.project.supported}p" cond="${param.parent_id} isEmpty" />
+			<codes>
+				<code name="project" cond="${prop.project.supported} equals 'gsp'">
+					<sql>
+						select project_id as value, name as label from <entity>${prop.project_table_name}</entity>
+					</sql>
+				</code>
+			</codes>
+			
+			<prop name="category.supported" value="g" cond="${header.method} equals 'GET'" />
+			<prop name="category.supported" value="${prop.category.supported}s" cond="${prop.category_supported} equals 'true'" />
+			<prop name="category.supported" value="${prop.category.supported}p" cond="${param.parent_id} isEmpty" />
+			
 			<style src="../../css/table.detail.css" />
 			<script src="//cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" name="jquery" override="true" preload="true" />
 			<script src="../../js/table.detail.js" />
@@ -366,24 +708,39 @@ table#graha_column th {
 		<layout>
 			<top>
 				<left>
-					<link name="list" label="목록" path="/table/list">
+					<link name="list" label="목록" path="list">
 						<params>
 							<param name="page" type="param" value="page" />
+							<param name="category" value="category" type="prop" />
+							<param name="project_id" value="project_id" type="prop" />
 						</params>
 					</link>
 				</left>
-				<center />
+				<center>
+					<search name="project" label="변경" path="project" method="post" cond="${prop.project.supported} equals 'gsp'">
+						<params>
+							<param name="graha_table_id" type="query" value="graha_table.graha_table_id" hidden="true" />
+							<param name="parent_id" type="query" value="graha_table.parent_id" hidden="true" />
+							<param name="page" type="param" value="page" hidden="true" />
+							<param name="search" type="param" value="search" hidden="true" />
+							<param name="category" value="category" type="prop" hidden="true" />
+							<param name="project_id" type="select" value="query.project_id" for="project" />
+						</params>
+					</search>
+				</center>
 				<right>
-					<link name="update" label="수정" path="/table/insert">
+					<link name="update" label="수정" path="insert">
 						<params>
 							<param name="graha_table_id" type="query" value="graha_table_id" />
 							<param name="page" type="param" value="page" />
+							<param name="category" value="category" type="prop" />
+							<param name="project_id" value="project_id" type="prop" />
 						</params>
 					</link>
 				</right>
 			</top>
 			<middle>
-				<tab name="graha_table" label="테이블">
+				<tab name="graha_table" label="${prop.app.label}">
 					<row>
 						<column label="테이블이름" name="table_name" colspan="3" />
 						<column label="Graha PK" name="is_graha_style_key" />
@@ -429,47 +786,161 @@ table#graha_column th {
 				</tab>
 			</middle>
 			<bottom>
+				<center>
+					<search name="category" label="변경" path="category" method="post" cond="${prop.category.supported} equals 'gsp'">
+						<params>
+							<param name="graha_table_id" type="query" value="graha_table.graha_table_id" hidden="true" />
+							<param name="parent_id" type="query" value="graha_table.parent_id" hidden="true" />
+							<param name="page" type="param" value="page" hidden="true" />
+							<param name="search" type="param" value="search" hidden="true" />
+							<param name="project_id" value="project_id" type="prop" hidden="true" />
+							<param name="category" type="select" value="query.category" for="category" />
+						</params>
+					</search>
+				</center>
 				<left>
-					<link label="삭제" path="/table/delete" method="post" type="submit" msg="정말로 삭제하시겠습니까?">
+					<link label="삭제" path="delete" method="post" type="submit" msg="정말로 삭제하시겠습니까?">
 						<params>
 							<param name="graha_table_id" type="query" value="graha_table_id" />
+							<param name="category" value="category" type="prop" />
+							<param name="project_id" value="project_id" type="prop" />
 						</params>
 					</link>
 				</left>
 			</bottom>
 		</layout>
 	</query>
-	<query id="delete" funcType="delete" label="테이블">
+	<query id="delete" funcType="delete" label="${prop.app.label}">
 		<tables>
-			<table tableName="graha_table.graha_table" name="graha_table">
+			<table tableName="${prop.table_name}" name="graha_table">
 				<column name="graha_table_id" primary="true" value="param.graha_table_id" datatype="int" />
 				<where>
 					<sql>
-						insert_id = ?
+						1 = 1
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and graha_table.insert_id = ?
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select *
+							from <entity>${prop.user_role_table_name}</entity> _a
+							inner join <entity>${prop.user_role_table_name}</entity> _b 
+							on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where _a.<entity>${prop.login_name_column_name}</entity> = graha_table.insert_id
+						)
+</tile>
 					</sql>
 					<params>
-						<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'login_name'" />
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'role_name'" />
 					</params>
 				</where>
 			</table>
-			<table tableName="graha_table.graha_column" name="graha_column">
+			<table tableName="${prop.column_table_name}" name="graha_column">
 				<column name="graha_table_id" foreign="true" value="param.graha_table_id" datatype="int" />
 				<where>
 					<sql>
-						insert_id = ?
+						1 = 1
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and exists (
+							select * from <entity>${prop.table_name}</entity> as graha_table where graha_table.graha_table_id = graha_column.graha_table_id
+							and graha_table.insert_id = ?
+						)
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select * from <entity>${prop.table_name}</entity> as graha_table
+								inner join <entity>${prop.user_role_table_name}</entity> _a on _a.login_name = graha_table.insert_id
+								inner join <entity>${prop.user_role_table_name}</entity> _b 
+									on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where graha_table.graha_table_id = graha_column.graha_table_id
+						)
+</tile>
 					</sql>
 					<params>
-						<param name="insert_id" datatype="varchar" value="prop.logined_user" />
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'login_name'" />
+						<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'role_name'" />
 					</params>
 				</where>
 			</table>
 		</tables>
-		<redirect path="/table/list" />
+		<redirect path="list">
+			<param name="category" value="category" type="prop" />
+			<param name="project_id" value="project_id" type="prop" />
+		</redirect>
 	</query>
 	<query id="load" funcType="query" label="Load From DB">
 		<commands>
 			<command name="execute" type="native" class="kr.graha.sample.table.LoadFromDBProcessorImpl" />
 		</commands>
-		<redirect path="/table/list" />
+		<redirect path="list" />
+	</query>
+	<query id="project" funcType="query" label="Project 변경" auth="${prop.project_supported} equals 'true'">
+		<commands>
+			<command>
+				<sql>
+					update <entity>${prop.table_name}</entity> as graha_table set project_id = ?
+					where graha_table_id = ?
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and graha_table.insert_id = ?
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select *
+							from <entity>${prop.user_role_table_name}</entity> _a
+							inner join <entity>${prop.user_role_table_name}</entity> _b 
+							on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where _a.<entity>${prop.login_name_column_name}</entity> = graha_table.insert_id
+						)
+</tile>
+				</sql>
+				<params>
+					<param name="project_id" datatype="int" value="prop.project_id" />
+					<param name="graha_table_id" datatype="int" value="param.graha_table_id" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'login_name'" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'role_name'" />
+				</params>
+			</command>
+		</commands>
+		<redirect path="detail">
+			 <param name="graha_table_id" type="param" value="graha_table_id" />
+			 <param name="search" type="param" value="search" />
+			 <param name="category" value="category" type="prop" />
+			 <param name="project_id" value="project_id" type="prop" />
+		</redirect>
+	</query>
+	<query id="category" funcType="query" label="Category 변경" auth="${prop.category_supported} equals 'true'">
+		<commands>
+			<command>
+				<sql>
+					update <entity>${prop.table_name}</entity> as graha_table set category = ?
+					where graha_table_id = ?
+<tile cond="${prop.authentication_type} equals 'login_name'">
+						and graha_table.insert_id = ?
+</tile>
+<tile cond="${prop.authentication_type} equals 'role_name'">
+						and exists (
+							select *
+							from <entity>${prop.user_role_table_name}</entity> _a
+							inner join <entity>${prop.user_role_table_name}</entity> _b 
+							on _a.<entity>${prop.role_name_column_name}</entity> = _b.<entity>${prop.role_name_column_name}</entity> and _b.<entity>${prop.login_name_column_name}</entity> = ?
+							where _a.<entity>${prop.login_name_column_name}</entity> = graha_table.insert_id
+						)
+</tile>
+				</sql>
+				<params>
+					<param name="category" datatype="varchar" value="prop.category" />
+					<param name="graha_table_id" datatype="int" value="param.graha_table_id" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'login_name'" />
+					<param name="insert_id" datatype="varchar" value="prop.logined_user" cond="${prop.authentication_type} equals 'role_name'" />
+				</params>
+			</command>
+		</commands>
+		<redirect path="detail">
+			 <param name="graha_table_id" type="param" value="graha_table_id" />
+			 <param name="search" type="param" value="search" />
+			 <param name="category" value="category" type="prop" />
+			 <param name="project_id" value="project_id" type="prop" />
+		</redirect>
 	</query>
 </querys>

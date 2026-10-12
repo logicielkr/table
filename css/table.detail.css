@@ -34,6 +34,11 @@ table#graha_table td.is_graha_style_pseudo_column {
 	min-width:50px;
 	text-align:center;
 }
+@media only screen and (max-width: 800px) {
+	form.project select.project_id {
+		max-width:200px;
+	}
+}
 @media only screen and (max-width: 600px) {
 	body {
 		margin:0px;
@@ -91,5 +96,8 @@ table#graha_table td.is_graha_style_pseudo_column {
 	table#graha_column td.contents
 	{
 		min-height:50px;
+	}
+	form.project select.project_id {
+		max-width:130px;
 	}
 }

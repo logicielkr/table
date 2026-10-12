@@ -3,15 +3,41 @@ table#graha_table td.table_name_mobile
 {
 	display:none;
 }
-@media only screen and (max-width: 600px) {
+table#graha_table {
+	table-layout: fixed;
+}
+table#graha_table th.project_name, 
+table#graha_table td.project_name,
+table#graha_table th.category, 
+table#graha_table td.category {
+	width:150px;
+}
+table#graha_table td.project_name,
+table#graha_table td.category {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+@media only screen and (max-width: 900px) {
 	table#graha_table th.table_comments,
 	table#graha_table td.table_comments,
+/*
+	table#graha_table th.gbn,
+	table#graha_table td.gbn,
+*/
+	table#graha_table th.project_name, 
+	table#graha_table td.project_name,
+	table#graha_table th.category, 
+	table#graha_table td.category
+	{
+		display:none;
+	}
+}
+@media only screen and (max-width: 600px) {
 	table#graha_table th.jndi,
 	table#graha_table td.jndi,
 	table#graha_table th.schema_name,
 	table#graha_table td.schema_name,
-	table#graha_table th.gbn,
-	table#graha_table td.gbn
 	{
 		display:none;
 	}
